@@ -186,9 +186,27 @@ def main():
             else:
                 st.warning(f"Image {filename} not found.")
 
-        tab1, tab2, tab3 = st.tabs(["💰 Financial Patterns", "📅 Contract Insights", "🔮 Feature Importance"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📊 Model Performance", "💰 Financial Patterns", "📅 Contract Insights", "🔮 Feature Importance"])
         
         with tab1:
+            st.subheader("Logistic Regression Performance Metrics")
+            st.markdown("The following metrics evaluate how well our model predicts customer churn on unseen test data.")
+            
+            # Using the exact metrics output by our training script
+            mcol1, mcol2, mcol3, mcol4 = st.columns(4)
+            with mcol1:
+                st.metric(label="Accuracy", value="80.53%", help="Percentage of correct predictions overall.")
+            with mcol2:
+                st.metric(label="ROC-AUC", value="0.8361", help="Model's ability to distinguish between classes.")
+            with mcol3:
+                st.metric(label="Precision", value="65.15%", help="Accuracy of positive (churn) predictions.")
+            with mcol4:
+                st.metric(label="Recall", value="57.49%", help="Percentage of actual churners correctly identified.")
+                
+            st.markdown("---")
+            st.info("💡 **Insight:** The model achieves a strong ROC-AUC score, indicating it is highly effective at ranking customers by their true risk of churning.")
+        
+        with tab2:
             st.subheader("Financial Impact on Churn")
             col1, col2 = st.columns(2)
             with col1:
@@ -196,7 +214,7 @@ def main():
             with col2:
                 display_image('correlation_heatmap.png')
                 
-        with tab2:
+        with tab3:
             st.subheader("Demographics & Contracts")
             col1, col2 = st.columns(2)
             with col1:
@@ -205,7 +223,7 @@ def main():
             with col2:
                 display_image('churn_vs_contract.png')
                 
-        with tab3:
+        with tab4:
             st.subheader("What drives churn?")
             st.markdown("This chart explains which features our Machine Learning model found most critical in predicting churn.")
             display_image('feature_importance.png')
