@@ -9,6 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, roc_auc_score
 import joblib
 import os
@@ -177,13 +178,15 @@ def main():
     print("\nTraining models...")
     models = {
         'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
-        'Decision Tree': DecisionTreeClassifier(random_state=42, max_depth=5),
-        'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100)
+        'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100),
+        'XGBoost': XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss')
     }
     
     best_model_name = None
     best_roc_auc = 0
     best_pipeline = None
+    
+    model_metrics = {}
     
     for name, model in models.items():
         pipeline = build_model_pipeline(categorical_cols, numerical_cols, model)
@@ -193,6 +196,7 @@ def main():
         y_prob = pipeline.predict_proba(X_test)[:, 1]
         
         metrics = evaluate_model(y_test, y_pred, y_prob, name)
+        model_metrics[name] = metrics['roc_auc']
         
         if metrics['roc_auc'] > best_roc_auc:
             best_roc_auc = metrics['roc_auc']
@@ -208,11 +212,12 @@ def main():
     plot_feature_importance(classifier, feature_names, eda_output_dir, best_model_name)
     print("Feature importance plot saved.")
     
-    # 7. Save Model
+    # 7. Save Model and Metrics
     print(f"\nSaving best model to {model_output_path}...")
     os.makedirs(os.path.dirname(model_output_path), exist_ok=True)
     joblib.dump(best_pipeline, model_output_path)
-    print("Model saved successfully.")
+    joblib.dump(model_metrics, 'models/model_metrics.pkl')
+    print("Model and metrics saved successfully.")
 
 if __name__ == '__main__':
     main()

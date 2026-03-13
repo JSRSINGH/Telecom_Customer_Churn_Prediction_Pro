@@ -47,6 +47,13 @@ def load_model():
         return joblib.load(MODEL_PATH)
     return None
 
+@st.cache_resource
+def load_metrics():
+    metrics_path = 'models/model_metrics.pkl'
+    if os.path.exists(metrics_path):
+        return joblib.load(metrics_path)
+    return None
+
 def main():
     st.title("📶 Telecom Customer Churn Prediction Pro")
     st.markdown("Predict customer churn using advanced machine learning with real-time analytics.")
@@ -205,6 +212,27 @@ def main():
                 
             st.markdown("---")
             st.info("💡 **Insight:** The model achieves a strong ROC-AUC score, indicating it is highly effective at ranking customers by their true risk of churning.")
+            
+            # Additional Section: Model Comparison
+            st.markdown("### 🏆 Model Comparison")
+            metrics = load_metrics()
+            
+            if metrics:
+                # Convert dictionary to DataFrame for easy charting
+                df_metrics = pd.DataFrame(list(metrics.items()), columns=['Model', 'ROC-AUC'])
+                df_metrics = df_metrics.sort_values(by='ROC-AUC', ascending=False)
+                
+                st.markdown("Here is how our deployed model stacks up against other algorithms we tested:")
+                
+                st.bar_chart(data=df_metrics, x='Model', y='ROC-AUC', use_container_width=True)
+                
+                # Show raw numbers underneath
+                cols = st.columns(len(metrics))
+                for i, row in enumerate(df_metrics.itertuples()):
+                    with cols[i]:
+                        st.metric(label=row.Model, value=f"{row._2:.4f}")
+            else:
+                st.warning("Model comparison metrics not found. Re-run training to generate `model_metrics.pkl`.")
         
         with tab2:
             st.subheader("Financial Impact on Churn")
